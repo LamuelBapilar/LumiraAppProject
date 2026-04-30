@@ -1,16 +1,15 @@
-import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  Pressable,
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-} from 'react-native';
 import Icon from '@/components/AppIcon';
 import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import {
+  Animated,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const DRAWER_WIDTH = 260;
 
@@ -22,13 +21,13 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { name: 'index', icon: 'House', label: 'Home' },
+  { name: 'HomePage', icon: 'House', label: 'Home' },
   { name: 'mood-tracker', icon: 'SmilePlus', label: 'Mood Tracker' },
   { name: 'SleepTracker', icon: 'Moon', label: 'Sleep Tracker' },
   { name: 'journal', icon: 'BookOpen', label: 'Journal' },
   { name: 'insights', icon: 'BarChart2', label: 'Insights' },
-  { name: 'lumi-therapy', icon: 'Heart', label: 'Lumi Therapy' },
-  { name: 'meditation', icon: 'Leaf', label: 'Meditation Room' },
+  { name: 'SBwellnessCheck', icon: 'Heart', label: 'Lumi Therapy' },
+  { name: 'TestingUtils', icon: 'Leaf', label: 'Meditation Room' },
   { name: 'BreathWork', icon: 'Wind', label: 'Breath Work' },
 ];
 
@@ -93,7 +92,7 @@ const DrawerLayout = ({ children, title = 'App', activeRoute = 'index', onNaviga
       <SafeAreaView className="flex-1">
 
         {/* TOP BAR */}
-        <View className="h-16 bg-white border-b border-gray-200 flex-row items-center px-4 gap-3">
+        <View className="h-16 bg-white border-b border-gray-200 flex-row items-center px-4 gap-3 mt-7">
           <TouchableOpacity
             onPress={isOpen ? closeDrawer : openDrawer}
             className="w-10 h-10 border border-gray-200 rounded-lg items-center justify-center"
@@ -141,7 +140,7 @@ const DrawerLayout = ({ children, title = 'App', activeRoute = 'index', onNaviga
         <SafeAreaView className="flex-1">
 
           {/* DRAWER HEADER */}
-          <View className="px-4 py-5 border-b border-gray-100 flex-row items-center gap-3">
+          <View className="px-4 py-5 border-b border-gray-100 flex-row items-center gap-3 mt-7">
             <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center">
               <Text className="text-blue-600 font-semibold text-sm">JD</Text>
             </View>
