@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  LayoutAnimation,
-  Platform,
-  UIManager
-} from 'react-native';
+import { View,Text, TouchableOpacity, ScrollView, LayoutAnimation, Platform, UIManager} from 'react-native';
 
 import BreathingHelp from '@/components/breathing-pages/BreathingHelp';
 import BreathingForm from '@/components/breathing-pages/BreathingForm';
@@ -41,7 +33,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <NavigationBar title="Index" activeRoute="home">
+    <NavigationBar title="Breath Work" activeRoute="breathing">
       <ScrollView>
         <View className="px-4 py-6">
 
