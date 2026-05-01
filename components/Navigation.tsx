@@ -1,3 +1,4 @@
+//Navigation.tsx
 import Icon from '@/components/AppIcon';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
@@ -27,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'journal', icon: 'BookOpen', label: 'Journal' },
   { name: 'insights', icon: 'BarChart2', label: 'Insights' },
   { name: 'SBwellnessCheck', icon: 'Heart', label: 'Lumi Therapy' },
-  { name: 'TestingUtils', icon: 'Leaf', label: 'Meditation Room' },
+  { name: 'MeditationRoom', icon: 'Leaf', label: 'Meditation Room' },
   { name: 'BreathWork', icon: 'Wind', label: 'Breath Work' },
 ];
 
@@ -39,7 +40,14 @@ type Props = {
 };
 
 const DrawerLayout = ({ children, title = 'App', activeRoute = 'index', onNavigate }: Props) => {
-  const router = useRouter();
+  // Safely get router — avoids crash when navigation context is not yet ready
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    router = useRouter();
+  } catch (_) {
+    router = null;
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
@@ -78,6 +86,7 @@ const DrawerLayout = ({ children, title = 'App', activeRoute = 'index', onNaviga
   const handleNavigate = (name: string) => {
     closeDrawer();
     onNavigate?.(name);
+    if (!router) return;
     if (name === 'index') {
       router.push('/');
     } else {

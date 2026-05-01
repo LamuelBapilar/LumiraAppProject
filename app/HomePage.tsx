@@ -1,5 +1,6 @@
 import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import WellnessGraph from '@/components/WellnessGraph';
 import { MoodEntriesService } from '@/utils/supabaseWellness';
 import { ResizeMode, Video } from 'expo-av';
 import React, { useEffect, useRef, useState } from 'react';
@@ -388,7 +389,6 @@ const DashboardHome: React.FC = () => {
                 </View>
               ) : currentMood ? (
                 <View className="items-center">
-                  {/* Show local image if mood key exists in map, else show emoji text */}
                   {MOOD_IMAGES[currentMood.emoji.toLowerCase()] ? (
                     <Image
                       source={MOOD_IMAGES[currentMood.emoji.toLowerCase()]}
@@ -493,7 +493,7 @@ const DashboardHome: React.FC = () => {
             )}
           </View>
 
-          {/* ── Personalized Advice ───────────────────────────────────── */}
+          {/* ── Personalized Advice ───────────────────────────────────── 
           <Text className="text-gray-900 text-base font-extrabold tracking-tight mb-3">
             💡 Personalized Advice
           </Text>
@@ -517,6 +517,10 @@ const DashboardHome: React.FC = () => {
               </TouchableOpacity>
             ))}
           </ScrollView>
+           */}   
+
+          {/* ── Wellness Graph ────────────────────────────────────────── */}
+          <WellnessGraph isPremium={false} />
 
         </Animated.View>
       </ScrollView>

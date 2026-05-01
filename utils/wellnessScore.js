@@ -1,3 +1,4 @@
+// wellnessScore.js 
 // Wellness Score Calculation System
 // Formula: Wellness Score = (Avg Mood * 0.4) + (Sleep Score * 0.2) + (Journaling Score * 0.2) + (Meditation Score * 0.2)
 
