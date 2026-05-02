@@ -22,14 +22,14 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { name: 'HomePage', icon: 'House', label: 'Home' },
+  { name: 'dashboard-home', icon: 'House', label: 'Home' },
   { name: 'mood-tracker', icon: 'SmilePlus', label: 'Mood Tracker' },
-  { name: 'SleepTracker', icon: 'Moon', label: 'Sleep Tracker' },
+  { name: 'sleep-tracker', icon: 'Moon', label: 'Sleep Tracker' },
   { name: 'journal', icon: 'BookOpen', label: 'Journal' },
   { name: 'insights', icon: 'BarChart2', label: 'Insights' },
-  { name: 'SBwellnessCheck', icon: 'Heart', label: 'Lumi Therapy' },
-  { name: 'MeditationRoom', icon: 'Leaf', label: 'Meditation Room' },
-  { name: 'BreathWork', icon: 'Wind', label: 'Breath Work' },
+  { name: 'start-premium', icon: 'Heart', label: 'Lumi Therapy' },
+  { name: 'meditation-room', icon: 'Leaf', label: 'Meditation Room' },
+  { name: 'breathing-exercise', icon: 'Wind', label: 'Breath Work' },
 ];
 
 type Props = {

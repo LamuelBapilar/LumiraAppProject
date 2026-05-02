@@ -9,10 +9,10 @@ import {
   View
 } from 'react-native';
 
+import BreathingForm from '@/app/breathing-exercise/components/BreathingForm';
+import BreathingHelp from '@/app/breathing-exercise/components/BreathingHelp';
+import BreathingSession from '@/app/breathing-exercise/components/BreathingSession';
 import Icon from '@/components/AppIcon';
-import BreathingForm from '@/components/breathing-pages/BreathingForm';
-import BreathingHelp from '@/components/breathing-pages/BreathingHelp';
-import BreathingSession from '@/components/breathing-pages/BreathingSession';
 import NavigationBar from '@/components/Navigation';
 
 type BreathingSettings = {
@@ -43,7 +43,7 @@ export default function HomeScreen() {
   return (
     <NavigationBar title="Breath Work" activeRoute="home">
       <ScrollView>
-        <View className="px-4 py-6">
+        <View className="px-4 py-6 bg-white">
 
           {/* TITLE */}
           <View className="mb-6 items-center">

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  LayoutAnimation,
-  Platform,
-  UIManager
+    LayoutAnimation,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View
 } from 'react-native';
 
-import BreathingHelp from '@/components/breathing-pages/BreathingHelp';
-import BreathingForm from '@/components/breathing-pages/BreathingForm';
-import BreathingSession from '@/components/breathing-pages/BreathingSession';
+import BreathingForm from '@/app/breathing-exercise/components/BreathingForm';
+import BreathingHelp from '@/app/breathing-exercise/components/BreathingHelp';
+import BreathingSession from '@/app/breathing-exercise/components/BreathingSession';
 import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
 
@@ -41,9 +41,9 @@ export default function HomeScreen() {
   };
 
   return (
-    <NavigationBar title="Index" activeRoute="home">
+    <NavigationBar title="Breath Work" activeRoute="home">
       <ScrollView>
-        <View className="px-4 py-6">
+        <View className="px-4 py-6 bg-white">
 
           {/* TITLE */}
           <View className="mb-6 items-center">

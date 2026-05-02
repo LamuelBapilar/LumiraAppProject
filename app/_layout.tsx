@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,22 +7,26 @@ import "../global.css";
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="HomePage" options={{ headerShown: false }} />
-        <Stack.Screen name="BreathWork" options={{ headerShown: false }} />
-        <Stack.Screen name="SBwellnessCheck" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="dashboard-home/index" options={{ headerShown: false }} />
+        <Stack.Screen name="breathing-exercise/index" options={{ headerShown: false }} />
         <Stack.Screen name="SleepTracker" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="meditation-room/index" options={{ headerShown: false }} />
+        <Stack.Screen name="pricing/index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="start-premium/index"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

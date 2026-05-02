@@ -7,7 +7,7 @@ const SleepPaywall = () => {
   return (
     <NavigationBar>
       <ScrollView
-        className="flex-1 bg-gray-50"
+        className="flex-1 bg-white"
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',

@@ -332,8 +332,8 @@ const DashboardHome: React.FC = () => {
       : null;
 
   return (
-  <NavigationBar title="Dashboard">
-    <View className="flex-1 bg-stone-50">
+  <NavigationBar title="DashBoard">
+    <View className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <ScrollView
@@ -371,7 +371,7 @@ const DashboardHome: React.FC = () => {
             <WidgetCard className="w-full">
               <View className="flex-row items-center mb-3">
                 <Image
-                  source={require('../assets/images/current-mood.png')}
+                  source={require('@/assets/images/current-mood.png')}
                   className="w-6 h-6"
                   resizeMode="contain"
                 />
@@ -414,7 +414,7 @@ const DashboardHome: React.FC = () => {
               ) : (
                 <View className="items-center py-2">
                   <Video
-                    source={require('../assets/images/lumira/animation.mp4')}
+                    source={require('@/assets/images/lumira/animation.mp4')}
                     className="w-16 h-16 rounded-lg mb-2"
                     resizeMode={ResizeMode.COVER}
                     shouldPlay
@@ -436,7 +436,7 @@ const DashboardHome: React.FC = () => {
               <WidgetCard className="w-full">
                 <View className="flex-row items-center mb-3">
                   <Image
-                    source={require('../assets/images/stress-level.png')}
+                    source={require('@/assets/images/stress-level.png')}
                     className="w-6 h-6"
                     resizeMode="contain"
                   />
@@ -467,7 +467,7 @@ const DashboardHome: React.FC = () => {
               <WidgetCard className="w-full">
                 <View className="flex-row items-center mb-3">
                   <Image
-                    source={require('../assets/images/energy-level.png')}
+                    source={require('@/assets/images/energy-level.png')}
                     className="w-8 h-8"
                     resizeMode="contain"
                   />

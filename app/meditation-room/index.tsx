@@ -1,5 +1,5 @@
+import MeditationCard from '@/app/meditation-room/components/MeditationCard';
 import Icon from '@/components/AppIcon';
-import MeditationCard from '@/components/meditation/MeditationCard';
 import NavigationBar from '@/components/Navigation';
 import { MeditationService } from '@/utils/meditationService';
 import React, { useEffect, useState } from 'react';
@@ -213,7 +213,7 @@ const MeditationRoom: React.FC = () => {
   const isEmpty = meditations.length === 0 && (courses?.length || 0) === 0;
 
   return (
-    <NavigationBar>
+    <NavigationBar title="Meditation Room">
     <ScrollView
       className="flex-1 bg-white"
       showsVerticalScrollIndicator={false}
