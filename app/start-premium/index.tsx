@@ -1,6 +1,6 @@
 // app/start-premium/index.tsx
-import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import Icon from '@/components/ui/AppIcon';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {

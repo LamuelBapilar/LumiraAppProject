@@ -1,6 +1,6 @@
+import Icon from '@/components/ui/AppIcon';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import Icon from '@/components/AppIcon';
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type BreathingSettings = {
   inhale: number;

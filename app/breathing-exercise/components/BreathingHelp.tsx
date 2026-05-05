@@ -1,6 +1,6 @@
+import Icon from '@/components/ui/AppIcon';
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import Icon from '@/components/AppIcon';
+import { Text, View } from 'react-native';
 
 const BreathingHelp = () => {
   return (

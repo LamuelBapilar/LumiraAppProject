@@ -1,4 +1,4 @@
-import AppImage from '@/components/AppImage';
+import AppImage from '@/components/ui/AppImage';
 import { getSupabaseClient } from '@/utils/supabaseWellness';
 import {
   calculateWellnessScore,
@@ -16,9 +16,12 @@ import {
 } from 'react-native';
 import Svg, {
   Circle,
+  Defs,
   G,
   Line,
+  LinearGradient,
   Path,
+  Stop,
   Text as SvgText
 } from 'react-native-svg';
 
@@ -51,7 +54,7 @@ const TIME_RANGE_DAYS: Record<string, number> = {
 const TIME_RANGES = ['7D', '14D', '30D', '3M', '6M'];
 const PRIMARY_COLOR = '#16a34a';
 const GRAPH_HEIGHT = 160;
-const PADDING_X = 16;
+const PADDING_X = 18;
 const PADDING_Y = 12;
 
 // ─── Trend helpers ────────────────────────────────────────────────────────────
@@ -194,7 +197,6 @@ const WellnessGraph: React.FC<WellnessGraphProps> = ({ isPremium = false }) => {
   const wellnessInfo = getWellnessLevel(currentScore);
   const levelColors = getLevelColors(wellnessInfo?.level);
 
-  // Always use fixed 0–100 scale so single data points plot correctly
   const minScore = 0;
   const maxScore = 100;
   const range = 100;
@@ -212,282 +214,302 @@ const WellnessGraph: React.FC<WellnessGraphProps> = ({ isPremium = false }) => {
   const innerH = GRAPH_HEIGHT - PADDING_Y * 2;
   const denom = Math.max(1, points.length - 1);
 
+  // ── Curve paths ─────────────────────────────────────────────────────────────
+  const curvePath = buildCurve(points, graphWidth, minScore, range);
+  const areaPath = buildArea(curvePath, graphWidth);
+
   return (
-      <View className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+    <View className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
 
-        {/* ── Header ── */}
-        <View className="flex-row items-center gap-2 mb-4">
-          <AppImage
-            source={require('@/assets/images/lumira/mental.png')}
-            style={{ width: 90, height: 98, flexShrink: 0 }}
-            resizeMode="contain"
-          />
-          <View className="flex-1">
-            <Text className="font-semibold text-base text-gray-900 mb-0.5">
-              Mental Wellness Tracker
-            </Text>
-            <Text className="text-xs text-gray-500">
-              See how your mental wellness is evolving
-            </Text>
+      {/* ── Header ── */}
+      <View className="flex-row items-center gap-2 mb-4">
+        <AppImage
+          source={require('@/assets/images/lumira/mental.png')}
+          style={{ width: 90, height: 98, flexShrink: 0 }}
+          resizeMode="contain"
+        />
+        <View className="flex-1">
+          <Text className="font-semibold text-base text-gray-900 mb-0.5">
+            Mental Wellness Tracker
+          </Text>
+          <Text className="text-xs text-gray-500">
+            See how your mental wellness is evolving
+          </Text>
 
-            {hasData && (
-              <View className="mt-2 flex-row items-center gap-2 self-start px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200">
-                <View className="w-2 h-2 rounded-full bg-emerald-500" />
-                <Text className="text-sm font-bold text-emerald-700">
-                  {wellnessInfo?.level}
-                </Text>
-                <View className="w-px h-3 bg-emerald-300" />
-                <Text className={`text-sm font-medium ${getTrendColor(trend)}`}>
-                  {getTrendText(trend)}
+          {hasData && (
+            <View className="mt-2 flex-row items-center gap-2 self-start px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200">
+              <View className="w-2 h-2 rounded-full bg-emerald-500" />
+              <Text className="text-sm font-bold text-emerald-700">
+                {wellnessInfo?.level}
+              </Text>
+              <View className="w-px h-3 bg-emerald-300" />
+              <Text className={`text-sm font-medium ${getTrendColor(trend)}`}>
+                {getTrendText(trend)}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* ── Time Range Selector ── */}
+      <View style={styles.rangeContainer}>
+        {TIME_RANGES.slice(0, 3).map((r) => (
+          <TouchableOpacity
+            key={r}
+            onPress={() => setSelectedRange(r)}
+            style={[
+              styles.rangeButton,
+              selectedRange === r && styles.rangeButtonActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.rangeText,
+                selectedRange === r ? styles.rangeTextActive : styles.rangeTextInactive,
+              ]}
+            >
+              {r}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* ── Stats Row ── */}
+      {hasData && (
+        <View style={statsStyles.row}>
+          <View style={statsStyles.currentCard}>
+            <Svg width={56} height={56} viewBox="0 0 56 56">
+              <Circle cx={28} cy={28} r={RING_R} stroke="#e2e8f0" strokeWidth={5} fill="none" />
+              <Circle
+                cx={28} cy={28} r={RING_R}
+                stroke={PRIMARY_COLOR}
+                strokeWidth={5}
+                fill="none"
+                strokeLinecap="round"
+                rotation={-90}
+                origin="28, 28"
+                strokeDasharray={`${RING_C}`}
+                strokeDashoffset={ringOffset}
+              />
+              <SvgText x={28} y={33} textAnchor="middle" fontSize={13} fontWeight="bold" fill="#0f172a">
+                {currentScore}
+              </SvgText>
+            </Svg>
+            <View style={statsStyles.currentLabel}>
+              <Text style={statsStyles.labelMain}>Current score</Text>
+              <Text style={statsStyles.labelSub}>out of 100</Text>
+            </View>
+          </View>
+
+          <View style={statsStyles.sideCol}>
+            <View style={statsStyles.sideCard}>
+              <Text style={statsStyles.sideLabel}>Average</Text>
+              <View style={statsStyles.sideRow}>
+                <Text style={statsStyles.sideValue}>{averageScore}</Text>
+                <View style={statsStyles.iconBox}>
+                  <Text style={statsStyles.icon}>⚡</Text>
+                </View>
+              </View>
+            </View>
+
+            {bestDay && (
+              <View style={statsStyles.sideCard}>
+                <Text style={statsStyles.sideLabel}>Best day</Text>
+                <View style={statsStyles.sideRow}>
+                  <Text style={statsStyles.sideValue}>{bestDay.score}</Text>
+                  <View style={[statsStyles.iconBox, { backgroundColor: '#fef3c7' }]}>
+                    <Text style={statsStyles.icon}>🗓</Text>
+                  </View>
+                </View>
+                <Text style={statsStyles.dateSub}>
+                  {new Date(bestDay.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </Text>
               </View>
             )}
           </View>
         </View>
+      )}
 
-        {/* ── Time Range Selector ── FIX: StyleSheet only, no dynamic className (gonna thank me for this ugly code) ── */}
-        <View style={styles.rangeContainer}>
-          {TIME_RANGES.slice(0, 3).map((r) => (
-            <TouchableOpacity
-              key={r}
-              onPress={() => setSelectedRange(r)}
-              style={[
-                styles.rangeButton,
-                selectedRange === r && styles.rangeButtonActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.rangeText,
-                  selectedRange === r ? styles.rangeTextActive : styles.rangeTextInactive,
-                ]}
-              >
-                {r}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* ── Stats Row ── */}
-        {hasData && (
-          <View style={statsStyles.row}>
-            {/* Current score ring — left card */}
-            <View style={statsStyles.currentCard}>
-              <Svg width={56} height={56} viewBox="0 0 56 56">
-                <Circle cx={28} cy={28} r={RING_R} stroke="#e2e8f0" strokeWidth={5} fill="none" />
-                <Circle
-                  cx={28}
-                  cy={28}
-                  r={RING_R}
-                  stroke={PRIMARY_COLOR}
-                  strokeWidth={5}
-                  fill="none"
-                  strokeLinecap="round"
-                  rotation={-90}
-                  origin="28, 28"
-                  strokeDasharray={`${RING_C}`}
-                  strokeDashoffset={ringOffset}
-                />
-                <SvgText x={28} y={33} textAnchor="middle" fontSize={13} fontWeight="bold" fill="#0f172a">
-                  {currentScore}
-                </SvgText>
-              </Svg>
-              <View style={statsStyles.currentLabel}>
-                <Text style={statsStyles.labelMain}>Current score</Text>
-                <Text style={statsStyles.labelSub}>out of 100</Text>
-              </View>
-            </View>
-
-            {/* Right column — Average + Best day stacked */}
-            <View style={statsStyles.sideCol}>
-              <View style={statsStyles.sideCard}>
-                <Text style={statsStyles.sideLabel}>Average</Text>
-                <View style={statsStyles.sideRow}>
-                  <Text style={statsStyles.sideValue}>{averageScore}</Text>
-                  <View style={statsStyles.iconBox}>
-                    <Text style={statsStyles.icon}>⚡</Text>
-                  </View>
-                </View>
-              </View>
-
-              {bestDay && (
-                <View style={statsStyles.sideCard}>
-                  <Text style={statsStyles.sideLabel}>Best day</Text>
-                  <View style={statsStyles.sideRow}>
-                    <Text style={statsStyles.sideValue}>{bestDay.score}</Text>
-                    <View style={[statsStyles.iconBox, { backgroundColor: '#fef3c7' }]}>
-                      <Text style={statsStyles.icon}>🗓</Text>
-                    </View>
-                  </View>
-                  <Text style={statsStyles.dateSub}>
-                    {new Date(bestDay.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </Text>
-                </View>
-              )}
-            </View>
+      {/* ── Graph ── */}
+      <View
+        className="bg-slate-50 rounded-2xl p-3 border border-slate-200 mb-2"
+        onLayout={(e) => setGraphWidth(e.nativeEvent.layout.width - 24)}
+      >
+        {loading && (
+          <View className="absolute top-3 left-3 z-10 flex-row items-center gap-1 px-3 py-1 rounded-full bg-blue-100 border border-blue-200">
+            <ActivityIndicator size="small" color="#3b82f6" />
+            <Text className="text-[10px] text-blue-800 font-medium">Loading...</Text>
           </View>
         )}
 
-        {/* ── Graph ── */}
-        <View
-          className="bg-slate-50 rounded-2xl p-3 border border-slate-200 mb-2"
-          onLayout={(e) => setGraphWidth(e.nativeEvent.layout.width - 24)}
-        >
-          {loading && (
-            <View className="absolute top-3 left-3 z-10 flex-row items-center gap-1 px-3 py-1 rounded-full bg-blue-100 border border-blue-200">
-              <ActivityIndicator size="small" color="#3b82f6" />
-              <Text className="text-[10px] text-blue-800 font-medium">Loading...</Text>
-            </View>
-          )}
+        <Svg width={graphWidth} height={GRAPH_HEIGHT} viewBox={`0 0 ${graphWidth} ${GRAPH_HEIGHT}`}>
 
-          <Svg width={graphWidth} height={GRAPH_HEIGHT} viewBox={`0 0 ${graphWidth} ${GRAPH_HEIGHT}`}>
+          {/* ── Gradient definition for area fill ── */}
+          <Defs>
+            <LinearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={PRIMARY_COLOR} stopOpacity={0.18} />
+              <Stop offset="100%" stopColor={PRIMARY_COLOR} stopOpacity={0} />
+            </LinearGradient>
+          </Defs>
 
-            {/* Grid lines */}
-            {[0, 25, 50, 75, 100].map((val) => {
-              const y = PADDING_Y + (1 - val / 100) * innerH;
-              return (
-                <G key={val}>
-                  <Line
-                    x1={PADDING_X}
-                    y1={y}
-                    x2={PADDING_X + innerW}
-                    y2={y}
-                    stroke={val === 50 ? '#d1d5db' : '#f3f4f6'}
-                    strokeWidth={val === 50 ? 1 : 0.5}
-                    strokeDasharray={val === 50 ? undefined : '4,2'}
-                  />
-                  <SvgText
-                    x={PADDING_X - 4}
-                    y={y + 4}
-                    textAnchor="end"
-                    fontSize={9}
-                    fill="#94a3b8"
-                  >
-                    {val}
-                  </SvgText>
-                </G>
-              );
-            })}
-
-            {/* Hover guideline */}
-            {hoveredIndex !== null && points[hoveredIndex] && (() => {
-              const x = PADDING_X + (hoveredIndex / denom) * innerW;
-              return (
+          {/* Grid lines */}
+          {[0, 25, 50, 75, 100].map((val) => {
+            const y = PADDING_Y + (1 - val / 100) * innerH;
+            return (
+              <G key={val}>
                 <Line
-                  x1={x} y1={PADDING_Y}
-                  x2={x} y2={GRAPH_HEIGHT - PADDING_Y}
-                  stroke="#dcfce7"
-                  strokeWidth={1}
+                  x1={PADDING_X} y1={y}
+                  x2={PADDING_X + innerW} y2={y}
+                  stroke={val === 50 ? '#d1d5db' : '#f3f4f6'}
+                  strokeWidth={val === 50 ? 1 : 0.5}
+                  strokeDasharray={val === 50 ? undefined : '4,2'}
                 />
-              );
-            })()}
+                <SvgText
+                  x={PADDING_X - 4} y={y + 4}
+                  textAnchor="end" fontSize={9} fill="#94a3b8"
+                >
+                  {val}
+                </SvgText>
+              </G>
+            );
+          })}
 
-            {/* Data points */}
-            {points.map((day, index) => {
-              const x = PADDING_X + (index / denom) * innerW;
-              const y = GRAPH_HEIGHT - PADDING_Y - ((day.score - minScore) / range) * innerH;
-              const isHovered = hoveredIndex === index;
-
-              return (
-                <G key={day.date}>
-                  <Circle
-                    cx={x}
-                    cy={y}
-                    r={14}
-                    fill="transparent"
-                    onPress={() => setHoveredIndex(isHovered ? null : index)}
-                  />
-                  <Circle
-                    cx={x}
-                    cy={y}
-                    r={isHovered ? 5 : 3.5}
-                    fill={isHovered ? PRIMARY_COLOR : '#ffffff'}
-                    stroke={PRIMARY_COLOR}
-                    strokeWidth={2}
-                  />
-                  {isHovered && (() => {
-                    const tipX = Math.max(x - 50, PADDING_X);
-                    const tipY = Math.max(y - 72, 4);
-                    return (
-                      <G>
-                        <Path
-                          d={`M ${tipX} ${tipY} h 110 a 8 8 0 0 1 8 8 v 48 a 8 8 0 0 1 -8 8 h -110 a 8 8 0 0 1 -8 -8 v -48 a 8 8 0 0 1 8 -8 z`}
-                          fill="#f0fdf4"
-                          stroke="#86efac"
-                          strokeWidth={0.5}
-                        />
-                        <SvgText x={tipX + 55} y={tipY + 18} textAnchor="middle" fontSize={10} fontWeight="bold" fill="#166534">
-                          {day.date}
-                        </SvgText>
-                        <SvgText x={tipX + 55} y={tipY + 36} textAnchor="middle" fontSize={13} fontWeight="bold" fill="#16a34a">
-                          {day.mood_emoji} {day.score}/100
-                        </SvgText>
-                        <SvgText x={tipX + 55} y={tipY + 54} textAnchor="middle" fontSize={10} fill="#15803d">
-                          Stress: {day.stress_level}/10
-                        </SvgText>
-                      </G>
-                    );
-                  })()}
-                </G>
-              );
-            })}
-          </Svg>
-
-          {/* No data overlay */}
-          {!hasData && !loading && (
-            <View className="absolute inset-0 items-center justify-center px-4">
-              <View className="bg-white border border-gray-200 rounded-xl px-4 py-3 items-center">
-                <Text className="text-sm font-semibold text-gray-900 mb-1">
-                  Not enough data yet
-                </Text>
-                <Text className="text-xs text-gray-500 text-center">
-                  Keep tracking your mood for 2–3 days. The graph appears after we have at least one day of data.
-                </Text>
-              </View>
-            </View>
+          {/* ── Area fill under curve ── */}
+          {hasData && areaPath !== 'M 0 0' && (
+            <Path
+              d={areaPath}
+              fill="url(#areaGradient)"
+            />
           )}
-        </View>
 
-        {/* ── X-axis labels ── */}
-        {hasData && (
-          <View className="flex-row justify-between px-2 mb-3">
-            {points.map((day, index) => {
-              const step = Math.max(1, Math.floor(points.length / 6));
-              const show = index % step === 0 || index === points.length - 1;
-              return show ? (
-                <Text key={day.date} className="text-[10px] text-gray-400 font-medium">
-                  {new Date(day.date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </Text>
-              ) : (
-                <View key={day.date} />
-              );
-            })}
-          </View>
-        )}
+          {/* ── Smooth curve line ── */}
+          {hasData && curvePath !== 'M 0 0' && (
+            <Path
+              d={curvePath}
+              fill="none"
+              stroke={PRIMARY_COLOR}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-        {/* ── Premium Section ── */}
-        {isPremium && (
-          <View className="border-t border-gray-100 pt-4 mt-2">
-            <View className="flex-row items-center gap-2 mb-3">
-              <Text className="text-yellow-500 text-base">👑</Text>
-              <Text className="text-sm font-medium text-gray-900">Premium Insights</Text>
-            </View>
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Text className="text-xs font-medium text-gray-900">Predicted Score</Text>
-                <Text className="text-xs text-gray-500">Tomorrow: 98/100</Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-xs font-medium text-gray-900">Best Practice</Text>
-                <Text className="text-xs text-gray-500">Morning meditation</Text>
-              </View>
+          {/* Hover guideline */}
+          {hoveredIndex !== null && points[hoveredIndex] && (() => {
+            const x = PADDING_X + (hoveredIndex / denom) * innerW;
+            return (
+              <Line
+                x1={x} y1={PADDING_Y}
+                x2={x} y2={GRAPH_HEIGHT - PADDING_Y}
+                stroke="#86efac"
+                strokeWidth={1}
+              />
+            );
+          })()}
+
+          {/* Data points */}
+          {points.map((day, index) => {
+            const x = PADDING_X + (index / denom) * innerW;
+            const y = GRAPH_HEIGHT - PADDING_Y - ((day.score - minScore) / range) * innerH;
+            const isHovered = hoveredIndex === index;
+
+            return (
+              <G key={day.date}>
+                <Circle
+                  cx={x} cy={y} r={14}
+                  fill="transparent"
+                  onPress={() => setHoveredIndex(isHovered ? null : index)}
+                />
+                <Circle
+                  cx={x} cy={y}
+                  r={isHovered ? 5 : 3.5}
+                  fill={isHovered ? PRIMARY_COLOR : '#ffffff'}
+                  stroke={PRIMARY_COLOR}
+                  strokeWidth={2}
+                />
+                {isHovered && (() => {
+                  const tipX = Math.max(x - 50, PADDING_X);
+                  const tipY = Math.max(y - 72, 4);
+                  return (
+                    <G>
+                      <Path
+                        d={`M ${tipX} ${tipY} h 110 a 8 8 0 0 1 8 8 v 48 a 8 8 0 0 1 -8 8 h -110 a 8 8 0 0 1 -8 -8 v -48 a 8 8 0 0 1 8 -8 z`}
+                        fill="#f0fdf4"
+                        stroke="#86efac"
+                        strokeWidth={0.5}
+                      />
+                      <SvgText x={tipX + 55} y={tipY + 18} textAnchor="middle" fontSize={10} fontWeight="bold" fill="#166534">
+                        {day.date}
+                      </SvgText>
+                      <SvgText x={tipX + 55} y={tipY + 36} textAnchor="middle" fontSize={13} fontWeight="bold" fill="#16a34a">
+                        {day.mood_emoji} {day.score}/100
+                      </SvgText>
+                      <SvgText x={tipX + 55} y={tipY + 54} textAnchor="middle" fontSize={10} fill="#15803d">
+                        Stress: {day.stress_level}/10
+                      </SvgText>
+                    </G>
+                  );
+                })()}
+              </G>
+            );
+          })}
+        </Svg>
+
+        {/* No data overlay */}
+        {!hasData && !loading && (
+          <View className="absolute inset-0 items-center justify-center px-4">
+            <View className="bg-white border border-gray-200 rounded-xl px-4 py-3 items-center">
+              <Text className="text-sm font-semibold text-gray-900 mb-1">
+                Not enough data yet
+              </Text>
+              <Text className="text-xs text-gray-500 text-center">
+                Keep tracking your mood for 2–3 days. The graph appears after we have at least one day of data.
+              </Text>
             </View>
           </View>
         )}
       </View>
+
+      {/* ── X-axis labels ── */}
+      {hasData && (
+        <View className="flex-row justify-between px-2 mb-3">
+          {points.map((day, index) => {
+            const step = Math.max(1, Math.floor(points.length / 6));
+            const show = index % step === 0 || index === points.length - 1;
+            return show ? (
+              <Text key={day.date} className="text-[10px] text-gray-400 font-medium">
+                {new Date(day.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </Text>
+            ) : (
+              <View key={day.date} />
+            );
+          })}
+        </View>
+      )}
+
+      {/* ── Premium Section ── */}
+      {isPremium && (
+        <View className="border-t border-gray-100 pt-4 mt-2">
+          <View className="flex-row items-center gap-2 mb-3">
+            <Text className="text-yellow-500 text-base">👑</Text>
+            <Text className="text-sm font-medium text-gray-900">Premium Insights</Text>
+          </View>
+          <View className="flex-row gap-4">
+            <View className="flex-1">
+              <Text className="text-xs font-medium text-gray-900">Predicted Score</Text>
+              <Text className="text-xs text-gray-500">Tomorrow: 98/100</Text>
+            </View>
+            <View className="flex-1">
+              <Text className="text-xs font-medium text-gray-900">Best Practice</Text>
+              <Text className="text-xs text-gray-500">Morning meditation</Text>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -569,7 +591,7 @@ const statsStyles = StyleSheet.create({
   },
 });
 
-// ─── Button styles (the only source of the NativeWind crash) ─────────────────
+// ─── Range selector styles ────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   rangeContainer: {
     flexDirection: 'row',

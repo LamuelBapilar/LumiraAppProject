@@ -1,5 +1,5 @@
 //Navigation.tsx
-import Icon from '@/components/AppIcon';
+import Icon from '@/components/ui/AppIcon';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
@@ -23,10 +23,10 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { name: 'dashboard-home', icon: 'House', label: 'Home' },
-  { name: 'mood-tracker', icon: 'SmilePlus', label: 'Mood Tracker' },
+  { name: 'mood-tracking', icon: 'SmilePlus', label: 'Mood Tracker' },
   { name: 'sleep-tracker', icon: 'Moon', label: 'Sleep Tracker' },
   { name: 'journal', icon: 'BookOpen', label: 'Journal' },
-  { name: 'insights', icon: 'BarChart2', label: 'Insights' },
+  { name: 'analytics-insights', icon: 'BarChart2', label: 'Insights' },
   { name: 'start-premium', icon: 'Heart', label: 'Lumi Therapy' },
   { name: 'meditation-room', icon: 'Leaf', label: 'Meditation Room' },
   { name: 'breathing-exercise', icon: 'Wind', label: 'Breath Work' },

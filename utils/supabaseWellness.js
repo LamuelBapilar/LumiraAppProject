@@ -3,7 +3,8 @@
  *
  * React Native / Expo — merged wellness services.
  * Includes: fetchPublicConfig, getSupabaseClient,
- *           MoodEntriesService, TherapyChatService, WellnessRealtime
+ *           MoodEntriesService, TherapyChatService, WellnessRealtime,
+ *           UserService, LogService
  *
  * Env vars (set in .env):
  *   EXPO_PUBLIC_SUPABASE_URL
@@ -355,5 +356,207 @@ export class WellnessRealtime {
         callback
       )
       .subscribe();
+  }
+}
+
+// ─── UserService ──────────────────────────────────────────────────────────────
+
+export class UserService {
+  /**
+   * Sync a Clerk user object to the Supabase users table.
+   *
+   * @param {object} clerkUser
+   * @returns {Promise<any>}
+   */
+  static async syncClerkUserToSupabase(clerkUser) {
+    const { id } = clerkUser || {};
+
+    const email =
+      clerkUser?.primary_email_address?.email_address ||
+      clerkUser?.primaryEmailAddress?.emailAddress ||
+      clerkUser?.email_addresses?.[0]?.email_address ||
+      clerkUser?.emailAddresses?.[0]?.emailAddress ||
+      null;
+
+    const fullName =
+      clerkUser?.full_name ||
+      clerkUser?.fullName ||
+      [
+        clerkUser?.first_name || clerkUser?.firstName || '',
+        clerkUser?.last_name  || clerkUser?.lastName  || '',
+      ]
+        .filter(Boolean)
+        .join(' ') ||
+      null;
+
+    const imageUrl =
+      clerkUser?.profile_image_url || clerkUser?.imageUrl || null;
+
+    if (!id) throw new Error('Clerk user ID is required');
+
+    const userData = {
+      id,
+      user_email:        email,
+      full_name:         fullName,
+      profile_image_url: imageUrl,
+      is_premium:        false,
+      onboarding:        false,
+      // created_at intentionally omitted — let DB default handle it on insert,
+      // and avoid overwriting it on conflict
+      updated_at:        new Date().toISOString(),
+    };
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('users')
+      .upsert([userData], { onConflict: 'id', ignoreDuplicates: false });
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Get a user profile from Supabase by user ID.
+   *
+   * @param {string} userId
+   * @returns {Promise<object|null>}
+   */
+  static async getUserProfile(userId) {
+    if (!userId) throw new Error('User ID is required');
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // User not found — normal for new users
+        return null;
+      } else if (error.message?.includes('JWT') || error.message?.includes('invalid')) {
+        throw new Error('Invalid API key. Please check your EXPO_PUBLIC_SUPABASE_ANON_KEY.');
+      } else if (error.message?.includes('fetch')) {
+        throw new Error('Network error. Please check your internet connection.');
+      } else {
+        throw new Error(`Database error: ${error.message}`);
+      }
+    }
+
+    return data;
+  }
+
+  /**
+   * Update a user profile.
+   *
+   * @param {string} userId
+   * @param {object} updates
+   * @returns {Promise<object>}
+   */
+  static async updateUserProfile(userId, updates) {
+    if (!userId) throw new Error('User ID is required');
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('users')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Check if a user has premium access.
+   *
+   * @param {string} userId
+   * @returns {Promise<boolean>}
+   */
+  static async hasPremiumAccess(userId) {
+    try {
+      const profile = await this.getUserProfile(userId);
+      return profile?.is_premium || false;
+    } catch (error) {
+      console.error('Error checking premium access:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Upgrade a user to premium.
+   *
+   * @param {string} userId
+   * @returns {Promise<object>}
+   */
+  static async upgradeToPremium(userId) {
+    if (!userId) throw new Error('User ID is required');
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('users')
+      .update({
+        is_premium: true,
+        role:       'premium',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+}
+
+// ─── LogService ───────────────────────────────────────────────────────────────
+
+export class LogService {
+  /**
+   * Write an activity log entry.
+   *
+   * @param {{
+   *   userId: string,
+   *   eventType: string,
+   *   severity?: 'info'|'success'|'warning'|'error'|'critical',
+   *   status?: string,
+   *   description?: string,
+   *   source?: string,
+   *   metadata?: Record<string, any>,
+   *   correlationId?: string|null
+   * }} params
+   * @returns {Promise<boolean>}
+   */
+  static async logEvent(params) {
+    const {
+      userId,
+      eventType,
+      severity      = 'info',
+      status        = 'succeeded',
+      description   = '',
+      source        = 'app',
+      metadata      = {},
+      correlationId = null,
+    } = params || {};
+
+    if (!userId)    throw new Error('userId required for logEvent');
+    if (!eventType) throw new Error('eventType required for logEvent');
+
+    const client = await getSupabaseClient();
+    const { error } = await client.from('activity_logs').insert([{
+      user_id:        userId,
+      event_type:     eventType,
+      severity,
+      status,
+      description,
+      source,
+      metadata,
+      correlation_id: correlationId,
+    }]);
+
+    if (error) throw error;
+    return true;
   }
 }

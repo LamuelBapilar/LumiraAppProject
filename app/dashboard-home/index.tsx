@@ -1,19 +1,19 @@
-import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import Icon from '@/components/ui/AppIcon';
 import WellnessGraph from '@/components/WellnessGraph';
 import { MoodEntriesService } from '@/utils/supabaseWellness';
 import { ResizeMode, Video } from 'expo-av';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    Image,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 

@@ -1,3 +1,4 @@
+// @/components/ui/AppImage
 import React, { useState } from 'react';
 import { ImageProps, Image as RNImage } from 'react-native';
 

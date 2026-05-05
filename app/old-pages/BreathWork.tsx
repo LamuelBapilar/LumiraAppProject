@@ -12,8 +12,8 @@ import {
 import BreathingForm from '@/app/breathing-exercise/components/BreathingForm';
 import BreathingHelp from '@/app/breathing-exercise/components/BreathingHelp';
 import BreathingSession from '@/app/breathing-exercise/components/BreathingSession';
-import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import Icon from '@/components/ui/AppIcon';
 
 type BreathingSettings = {
   inhale: number;

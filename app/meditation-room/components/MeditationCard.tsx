@@ -1,4 +1,4 @@
-import Icon from '@/components/AppIcon';
+import Icon from '@/components/ui/AppIcon';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 

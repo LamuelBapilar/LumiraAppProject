@@ -1,6 +1,6 @@
 import MeditationCard from '@/app/meditation-room/components/MeditationCard';
-import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import Icon from '@/components/ui/AppIcon';
 import { MeditationService } from '@/utils/meditationService';
 import React, { useEffect, useState } from 'react';
 import {

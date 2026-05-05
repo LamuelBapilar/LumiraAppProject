@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import {
-    LayoutAnimation,
-    Platform,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    UIManager,
-    View
+  LayoutAnimation,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View
 } from 'react-native';
 
 import BreathingForm from '@/app/breathing-exercise/components/BreathingForm';
 import BreathingHelp from '@/app/breathing-exercise/components/BreathingHelp';
 import BreathingSession from '@/app/breathing-exercise/components/BreathingSession';
-import Icon from '@/components/AppIcon';
 import NavigationBar from '@/components/Navigation';
+import Icon from '@/components/ui/AppIcon';
 
 type BreathingSettings = {
   inhale: number;

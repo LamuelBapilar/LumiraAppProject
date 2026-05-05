@@ -1,6 +1,7 @@
-import React from 'react';
+// @/components/ui/AppIcon.tsx
 import * as LucideIcons from 'lucide-react-native';
 import { HelpCircle } from 'lucide-react-native';
+import React from 'react';
 
 function Icon({
   name,
