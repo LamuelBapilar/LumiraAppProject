@@ -213,7 +213,7 @@ const MeditationRoom: React.FC = () => {
   const isEmpty = meditations.length === 0 && (courses?.length || 0) === 0;
 
   return (
-    <NavigationBar title="Meditation Room">
+    <NavigationBar activeRoute="meditation-room">
     <ScrollView
       className="flex-1 bg-white"
       showsVerticalScrollIndicator={false}

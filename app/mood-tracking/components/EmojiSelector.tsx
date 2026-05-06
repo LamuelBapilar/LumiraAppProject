@@ -4,24 +4,25 @@ import { FlatList, Image, Pressable, Text, View } from 'react-native';
 // ─── Mood Data ────────────────────────────────────────────────────────────────
 
 const defaultMoods = [
-  { emoji: require('@/assets/images/lumira/happy.png'),     label: 'Happy',     value: 'happy',     color: 'text-primary-500' },
-  { emoji: require('@/assets/images/lumira/sad.png'),       label: 'Sad',       value: 'sad',       color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/depressed.png'), label: 'Depressed', value: 'depressed', color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/angry.png'),     label: 'Angry',     value: 'angry',     color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/tired.png'),     label: 'Tired',     value: 'tired',     color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/confused.png'),  label: 'Confused',  value: 'confused',  color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/calm.png'),      label: 'Calm',      value: 'calm',      color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/confident.png'), label: 'Confident', value: 'confident', color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/cool.png'),      label: 'Cool',      value: 'cool',      color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/shy.png'),       label: 'Shy',       value: 'shy',       color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/suprise.png'),   label: 'Surprised', value: 'surprised', color: 'text-text-secondary' },
-  { emoji: require('@/assets/images/lumira/worried.png'),   label: 'Worried',   value: 'worried',   color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/happy.png'),     path: '/assets/images/lumira/happy.png',     label: 'Happy',     value: 'happy',     color: 'text-primary-500' },
+  { emoji: require('@/assets/images/lumira/sad.png'),       path: '/assets/images/lumira/sad.png',       label: 'Sad',       value: 'sad',       color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/depressed.png'), path: '/assets/images/lumira/depressed.png', label: 'Depressed', value: 'depressed', color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/angry.png'),     path: '/assets/images/lumira/angry.png',     label: 'Angry',     value: 'angry',     color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/tired.png'),     path: '/assets/images/lumira/tired.png',     label: 'Tired',     value: 'tired',     color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/confused.png'),  path: '/assets/images/lumira/confused.png',  label: 'Confused',  value: 'confused',  color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/calm.png'),      path: '/assets/images/lumira/calm.png',      label: 'Calm',      value: 'calm',      color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/confident.png'), path: '/assets/images/lumira/confident.png', label: 'Confident', value: 'confident', color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/cool.png'),      path: '/assets/images/lumira/cool.png',      label: 'Cool',      value: 'cool',      color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/shy.png'),       path: '/assets/images/lumira/shy.png',       label: 'Shy',       value: 'shy',       color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/suprise.png'),   path: '/assets/images/lumira/suprise.png',   label: 'Surprised', value: 'surprised', color: 'text-text-secondary' },
+  { emoji: require('@/assets/images/lumira/worried.png'),   path: '/assets/images/lumira/worried.png',   label: 'Worried',   value: 'worried',   color: 'text-text-secondary' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Mood {
   emoji: any;
+  path: string;
   label: string;
   value: string;
   color: string;

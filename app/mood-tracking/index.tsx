@@ -1,3 +1,4 @@
+//mood-tracking/index.tsx
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -9,18 +10,17 @@ import {
 } from 'react-native';
 
 import NavigationBar from '@/components/Navigation';
+import AIInsightProgress from '@/components/ui/AIInsightProgress';
 import Button from '@/components/ui/Button';
 import { LogService, MoodEntriesService } from '@/utils/supabaseWellness';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
 import EmojiSelector from './components/EmojiSelector';
 import IntensitySlider from './components/IntensitySlider';
 import QuickNotes from './components/QuickNotes';
 import TriggerIdentification from './components/TriggerIdentification';
 import WellnessQuestionnaire from './components/WellnessQuestionnaire';
-// import ContextualTags from './components/ContextualTags';
-// import HistoricalPreview from './components/HistoricalPreview';
-// import AIInsightProgress from '@/components/ui/AIInsightProgress';
 
 // ─── Static user (replaces Clerk) ────────────────────────────────────────────
 const USER_ID = 'user_3CClVidzX562pYzJPZjhejzmvn7';
@@ -82,9 +82,7 @@ const MoodTracking = () => {
     setAiPhase(1);
 
     try {
-      const feeling = selectedMood
-        ? `${selectedMood.emoji} ${selectedMood.label}`
-        : null;
+      const feeling = selectedMood ? `${selectedMood.path} ${selectedMood.label}` : null;
 
       const intensity_level        = Math.min(10, Math.max(1, intensity));
       const daily_factors          = questionnaire || null;
@@ -152,13 +150,13 @@ const MoodTracking = () => {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-white">
 
       {/* ── Navigation Bar ───────────────────────────────────────────────── */}
-      <NavigationBar title="Mood Tracker">
+      <NavigationBar activeRoute="mood-tracking">
 
       <ScrollView
-        className="flex-1"
+        className="flex-1 bg-white"
         contentContainerClassName="px-4 py-6"
         showsVerticalScrollIndicator={false}
       >
@@ -232,21 +230,12 @@ const MoodTracking = () => {
           />
         </View>
 
-        {/* ── AIInsightProgress ─────────────────────────────────────────────── */}
-        {aiPhase > 0 && (
-          <View className="mb-8 rounded-xl bg-primary-200 px-4 py-3">
-            <Text className="text-sm text-text-primary font-body">
-              {aiPhase === 1 && '✓ Entry saved'}
-              {aiPhase === 2 && '⏅ Sending to AI...'}
-              {aiPhase === 3 && '🔍 Analyzing...'}
-              {aiPhase === 4 && '✨ Insight ready!'}
-            </Text>
-          </View>
-        )}
-
         {/* Bottom spacing for sticky bar */}
         <View className="h-24" />
       </ScrollView>
+
+      {/* ── AIInsightProgress — fixed overlay, unaffected by scroll ─────── */}
+      <AIInsightProgress phase={aiPhase} />
 
       {/* ── Sticky Save Bar ───────────────────────────────────────────────── */}
       <View className="px-4 pb-4 pt-2 border-t border-border bg-white ">

@@ -4,7 +4,8 @@
  * React Native / Expo — merged wellness services.
  * Includes: fetchPublicConfig, getSupabaseClient,
  *           MoodEntriesService, TherapyChatService, WellnessRealtime,
- *           UserService, LogService
+ *           UserService, LogService, FeedbackService,
+ *           NotificationService, UpdatesService
  *
  * Env vars (set in .env):
  *   EXPO_PUBLIC_SUPABASE_URL
@@ -15,7 +16,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const EDGE_BASE = 'https://svmiesxzxshywukikqkt.supabase.co';
+const EDGE_BASE       = 'https://svmiesxzxshywukikqkt.supabase.co';
 const EDGE_CONFIG_URL = `${EDGE_BASE}/functions/v1/public-config`;
 
 // ─── fetchPublicConfig ────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ export const fetchPublicConfig = () => {
 
     // ── 3. Remote Edge Function fallback ─────────────────────────────────────
     const res = await fetch(EDGE_CONFIG_URL, {
-      method: 'GET',
+      method:  'GET',
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -66,13 +67,13 @@ export const fetchPublicConfig = () => {
     }
 
     const json = await res.json();
-    const url = json?.supabaseUrl ?? '';
-    const key = json?.supabaseAnonKey ?? '';
+    const url  = json?.supabaseUrl     ?? '';
+    const key  = json?.supabaseAnonKey ?? '';
 
     if (!url || !key) {
       throw new Error(
         'fetchPublicConfig: Edge Function returned empty url or key.\n' +
-          JSON.stringify(json)
+          JSON.stringify(json),
       );
     }
 
@@ -80,9 +81,7 @@ export const fetchPublicConfig = () => {
   })();
 
   // Clear cache on failure so the next call retries cleanly
-  cachedConfig.catch(() => {
-    cachedConfig = null;
-  });
+  cachedConfig.catch(() => { cachedConfig = null; });
 
   return cachedConfig;
 };
@@ -105,11 +104,9 @@ export const getSupabaseClient = async () => {
 
   _client = createClient(url, key, {
     auth: {
-      storageKey: 'calmive-auth',
-      // Uncomment for persistent sessions (requires @react-native-async-storage/async-storage):
-      // storage: AsyncStorage,
-      autoRefreshToken: true,
-      persistSession: true,
+      storageKey:        'calmive-auth',
+      autoRefreshToken:  true,
+      persistSession:    true,
       detectSessionInUrl: false, // must be false in React Native
     },
   });
@@ -139,16 +136,14 @@ export class MoodEntriesService {
     if (!userId) throw new Error('User ID is required to create mood entry');
     const { triggerAI = true } = options;
 
-    // Map ONLY columns that exist in public.mood_entries schema
     const row = {
-      user_id: userId,
-      feeling: entry.feeling ?? null,
-      intensity_level: entry.intensity_level ?? null,
+      user_id:                  userId,
+      feeling:                  entry.feeling                  ?? null,
+      intensity_level:          entry.intensity_level          ?? null,
       voice_note_transcription: entry.voice_note_transcription ?? null,
-      daily_factors: entry.daily_factors ?? null,
-      trigger_identification: entry.trigger_identification ?? null,
-      quick_notes: entry.quick_notes ?? null,
-      // created_at is handled by DB default
+      daily_factors:            entry.daily_factors            ?? null,
+      trigger_identification:   entry.trigger_identification   ?? null,
+      quick_notes:              entry.quick_notes              ?? null,
     };
 
     const client = await getSupabaseClient();
@@ -160,18 +155,17 @@ export class MoodEntriesService {
 
     if (error) throw error;
 
-    // Fire-and-forget: trigger AI insight function
     if (triggerAI) {
       MoodEntriesService.requestGeminiInsight({
-        entry_id: data?.entry_id,
-        user_id: userId,
-        feeling: row.feeling,
-        intensity_level: row.intensity_level,
+        entry_id:                 data?.entry_id,
+        user_id:                  userId,
+        feeling:                  row.feeling,
+        intensity_level:          row.intensity_level,
         voice_note_transcription: row.voice_note_transcription,
-        quick_notes: row.quick_notes,
-        daily_factors: row.daily_factors,
-        trigger_identification: row.trigger_identification,
-      }).catch(() => {}); // swallow — non-blocking
+        quick_notes:              row.quick_notes,
+        daily_factors:            row.daily_factors,
+        trigger_identification:   row.trigger_identification,
+      }).catch(() => {});
     }
 
     return data;
@@ -189,9 +183,9 @@ export class MoodEntriesService {
       `${EDGE_BASE}/functions/v1/gemini-mood-insight`;
 
     const res = await fetch(endpoint, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body:    JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -295,18 +289,18 @@ export class TherapyChatService {
       `${EDGE_BASE}/functions/v1/gemini-therapy-chat`;
 
     const payload = {
-      user_id: userId,
-      genz: Boolean(genz),
+      user_id:  userId,
+      genz:     Boolean(genz),
       messages: messages.map((m) => ({
-        role: m.sender === 'ai' ? 'ai' : 'user',
+        role:    m.sender === 'ai' ? 'ai' : 'user',
         content: String(m.text ?? ''),
       })),
     };
 
     const res = await fetch(endpoint, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body:    JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -335,7 +329,7 @@ export class WellnessRealtime {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'wellness_entries' },
-        callback
+        callback,
       )
       .subscribe();
   }
@@ -353,7 +347,7 @@ export class WellnessRealtime {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'wellness_insights' },
-        callback
+        callback,
       )
       .subscribe();
   }
@@ -373,14 +367,14 @@ export class UserService {
 
     const email =
       clerkUser?.primary_email_address?.email_address ||
-      clerkUser?.primaryEmailAddress?.emailAddress ||
-      clerkUser?.email_addresses?.[0]?.email_address ||
-      clerkUser?.emailAddresses?.[0]?.emailAddress ||
+      clerkUser?.primaryEmailAddress?.emailAddress    ||
+      clerkUser?.email_addresses?.[0]?.email_address  ||
+      clerkUser?.emailAddresses?.[0]?.emailAddress    ||
       null;
 
     const fullName =
       clerkUser?.full_name ||
-      clerkUser?.fullName ||
+      clerkUser?.fullName  ||
       [
         clerkUser?.first_name || clerkUser?.firstName || '',
         clerkUser?.last_name  || clerkUser?.lastName  || '',
@@ -401,8 +395,6 @@ export class UserService {
       profile_image_url: imageUrl,
       is_premium:        false,
       onboarding:        false,
-      // created_at intentionally omitted — let DB default handle it on insert,
-      // and avoid overwriting it on conflict
       updated_at:        new Date().toISOString(),
     };
 
@@ -432,16 +424,12 @@ export class UserService {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        // User not found — normal for new users
-        return null;
-      } else if (error.message?.includes('JWT') || error.message?.includes('invalid')) {
+      if (error.code === 'PGRST116') return null;
+      if (error.message?.includes('JWT') || error.message?.includes('invalid'))
         throw new Error('Invalid API key. Please check your EXPO_PUBLIC_SUPABASE_ANON_KEY.');
-      } else if (error.message?.includes('fetch')) {
+      if (error.message?.includes('fetch'))
         throw new Error('Network error. Please check your internet connection.');
-      } else {
-        throw new Error(`Database error: ${error.message}`);
-      }
+      throw new Error(`Database error: ${error.message}`);
     }
 
     return data;
@@ -509,6 +497,56 @@ export class UserService {
     if (error) throw error;
     return data;
   }
+
+  /**
+   * Link Stripe session to Clerk user.
+   *
+   * @param {string} clerkUserId
+   * @param {{ customerId?: string }} stripeData
+   * @returns {Promise<object>}
+   */
+  static async linkStripeSession(clerkUserId, stripeData) {
+    if (!clerkUserId) throw new Error('Clerk user ID is required');
+
+    const updates = {
+      is_premium: true,
+      updated_at: new Date().toISOString(),
+    };
+    if (stripeData.customerId) updates.stripe_customer_id = stripeData.customerId;
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('users')
+      .update(updates)
+      .eq('id', clerkUserId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Get user by Stripe customer ID.
+   *
+   * @param {string} stripeCustomerId
+   * @returns {Promise<object|null>}
+   */
+  static async getUserByStripeCustomerId(stripeCustomerId) {
+    try {
+      const client = await getSupabaseClient();
+      const { data, error } = await client
+        .from('users')
+        .select('*')
+        .eq('stripe_customer_id', stripeCustomerId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    } catch {
+      return null;
+    }
+  }
 }
 
 // ─── LogService ───────────────────────────────────────────────────────────────
@@ -558,5 +596,185 @@ export class LogService {
 
     if (error) throw error;
     return true;
+  }
+}
+
+// ─── FeedbackService ──────────────────────────────────────────────────────────
+
+export class FeedbackService {
+  /**
+   * Store user feedback in public.user_feedback.
+   * Matches web schema: user_id (text), feedback_text (text), page_url (text)
+   *
+   * @param {string} userId
+   * @param {string} feedbackText
+   * @param {string} pageUrl - current route/screen name, defaults to ''
+   * @returns {Promise<object>}
+   */
+  static async submitFeedback(userId, feedbackText, pageUrl = '') {
+    if (!userId) throw new Error('userId required');
+    const text = String(feedbackText || '').trim();
+    if (!text) throw new Error('feedback text required');
+
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('user_feedback')
+      .insert([{
+        user_id:       userId,
+        feedback_text: text,
+        page_url:      pageUrl || null,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+}
+
+// ─── NotificationService ──────────────────────────────────────────────────────
+
+export class NotificationService {
+  /**
+   * List important notifications for a user.
+   *
+   * @param {{ userId: string, limit?: number }} params
+   * @returns {Promise<object[]>}
+   */
+  static async listImportant({ userId, limit = 20 } = {}) {
+    if (!userId) return [];
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_important', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  /**
+   * Mark a notification as read.
+   *
+   * @param {string} notificationId
+   * @param {string} userId
+   * @returns {Promise<object|null>}
+   */
+  static async markRead(notificationId, userId) {
+    if (!notificationId || !userId) return null;
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('notifications')
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .eq('id', notificationId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Create a notification for a user.
+   *
+   * @param {{ userId: string, type: string, title: string, message: string, actionUrl?: string|null }} params
+   * @returns {Promise<object|null>}
+   */
+  static async createUserNotification({ userId, type, title, message, actionUrl = null }) {
+    if (!userId) return null;
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('notifications')
+      .insert([{
+        user_id:      userId,
+        type,
+        title,
+        message,
+        action_url:   actionUrl,
+        is_important: true,
+        is_read:      false,
+        created_at:   new Date().toISOString(),
+      }])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
+}
+
+// ─── UpdatesService ───────────────────────────────────────────────────────────
+
+export class UpdatesService {
+  /**
+   * List active global updates.
+   *
+   * @param {{ limit?: number }} params
+   * @returns {Promise<object[]>}
+   */
+  static async listActive({ limit = 10 } = {}) {
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('updates')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  /**
+   * Mark an update as viewed by a user.
+   * No-ops silently if already viewed.
+   *
+   * @param {string} updateId
+   * @param {string} userId
+   * @returns {Promise<object|null>}
+   */
+  static async markUpdateViewed(updateId, userId) {
+    if (!updateId || !userId) return null;
+    const client = await getSupabaseClient();
+
+    // Skip if already viewed
+    const { data: existing } = await client
+      .from('update_views')
+      .select('id')
+      .eq('update_id', updateId)
+      .eq('user_id', userId)
+      .single();
+
+    if (existing) return existing;
+
+    const { data, error } = await client
+      .from('update_views')
+      .insert([{
+        update_id: updateId,
+        user_id:   userId,
+        viewed_at: new Date().toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Get list of update IDs already viewed by a user.
+   *
+   * @param {string} userId
+   * @returns {Promise<string[]>}
+   */
+  static async getViewedUpdates(userId) {
+    if (!userId) return [];
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from('update_views')
+      .select('update_id')
+      .eq('user_id', userId);
+    if (error) throw error;
+    return (data || []).map((v) => v.update_id);
   }
 }

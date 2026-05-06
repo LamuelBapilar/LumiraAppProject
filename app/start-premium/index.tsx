@@ -29,7 +29,7 @@ const StartPremium = () => {
   };
 
   return (
-    <NavigationBar title="Start Premium">
+    <NavigationBar activeRoute="start-premium">
     <SafeAreaView className="flex-1 bg-white">
 
       {/* ── Close Button — outside ScrollView so it stays fixed ── */}

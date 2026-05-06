@@ -17,7 +17,7 @@ interface SleepPaywallProps {
 
 const SleepPaywall: React.FC<SleepPaywallProps> = ({ onUpgradePress }) => {
   return (
-    <NavigationBar title="Sleep Tracker">
+    <NavigationBar activeRoute="sleep-tracker">
       <ScrollView
         className="flex-1"
         contentContainerClassName="p-4 grow"

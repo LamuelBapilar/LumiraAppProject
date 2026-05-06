@@ -41,7 +41,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <NavigationBar title="Breath Work" activeRoute="home">
+    <NavigationBar activeRoute="breathing-exercise">
       <ScrollView>
         <View className="px-4 py-6 bg-white">
 

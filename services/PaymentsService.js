@@ -1,3 +1,4 @@
+//PaymentsService.js
 import { getStripePriceId, STRIPE_PRICES } from '@/config/stripePlans';
 import { getSupabaseClient } from '@/utils/supabaseWellness';
 

@@ -332,7 +332,7 @@ const DashboardHome: React.FC = () => {
       : null;
 
   return (
-  <NavigationBar title="DashBoard">
+  <NavigationBar activeRoute="dashboard-home">
     <View className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 

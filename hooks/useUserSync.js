@@ -1,5 +1,6 @@
+//useUserSync.js
+import { getSupabaseClient, LogService, UserService } from '@/utils/supabaseWellness';
 import { useEffect, useState } from 'react';
-import { getSupabaseClient, LogService, UserService } from './supabaseWellness';
 
 // Hardcoded user ID (replaces Clerk's useUser())
 const HARDCODED_USER_ID = 'user_3CClVidzX562pYzJPZjhejzmvn7';

@@ -16,7 +16,7 @@ interface AnalyticsInsightsProps {
 
 const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ onUpgradePress }) => {
   return (
-    <NavigationBar>
+    <NavigationBar activeRoute="analytics-insights">
       <ScrollView
         className="flex-1"
         contentContainerClassName="p-4 grow"
